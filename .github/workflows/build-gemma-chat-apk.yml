@@ -1,0 +1,38 @@
+name: Build Gemma Android APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Find Android Gradle projects
+        run: |
+          find . -name gradlew -type f
+
+      - name: Build APK
+        run: |
+          echo "No APK build target configured yet."
+          echo "The repository's Android project must be identified first."
+          exit 1
