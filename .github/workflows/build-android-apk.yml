@@ -28,14 +28,18 @@ jobs:
           channel: stable
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          yes | sdkmanager --licenses || true
 
       - name: Install Android SDK components
         run: |
-          sdkmanager "platforms;android-36" \
+          sdkmanager --install \
+            "platforms;android-36" \
             "build-tools;36.0.0" \
             "ndk;28.2.13676358"
-
+            
       - name: Prepare project
         working-directory: samples/litert/flutter
         run: |
