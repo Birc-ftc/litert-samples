@@ -1,4 +1,7 @@
-name: Build LiteRT Android APK
+name: Prepare project
+working-directory: samples/litert/flutter
+run: |
+flutter pub get
 
 'on':
   workflow_dispatch:
