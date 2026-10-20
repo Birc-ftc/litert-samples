@@ -1,7 +1,4 @@
-name: Prepare project
-working-directory: samples/litert/flutter
-run: |
-flutter pub get
+name: Build LiteRT Android APK
 
 'on':
   workflow_dispatch:
@@ -19,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
@@ -30,32 +27,15 @@ jobs:
           flutter-version: '3.47.3'
           channel: stable
 
-      - name: Set up Android SDK
-        run: |
-          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
-          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
-          yes | sdkmanager --licenses || true
-
-      - name: Install Android SDK components
-        run: |
-          sdkmanager --install \
-            "platforms;android-36" \
-            "build-tools;36.0.0" \
-            "ndk;28.2.13676358"
-            
       - name: Prepare project
         working-directory: samples/litert/flutter
         run: |
-          bash vendor.sh
-          bash fetch_models.sh
           flutter pub get
 
       - name: Build APK
         working-directory: samples/litert/flutter
         run: |
-          flutter build apk \
-            --release \
-            --target-platform android-arm64
+          flutter build apk --release --target-platform android-arm64
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
