@@ -1,0 +1,60 @@
+name: Build LiteRT Android APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.3'
+          channel: stable
+          cache: true
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK components
+        run: |
+          sdkmanager "platforms;android-36" \
+            "build-tools;36.0.0" \
+            "ndk;28.2.13676358"
+
+      - name: Prepare project
+        working-directory: samples/litert/flutter
+        run: |
+          bash vendor.sh
+          bash fetch_models.sh
+          flutter pub get
+
+      - name: Build APK
+        working-directory: samples/litert/flutter
+        run: |
+          flutter build apk \
+            --release \
+            --target-platform android-arm64
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: litert-android-apk
+          path: samples/litert/flutter/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 7
