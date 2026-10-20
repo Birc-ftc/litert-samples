@@ -8,6 +8,7 @@ permissions:
 
 jobs:
   build:
+    name: Build Android APK
     runs-on: ubuntu-latest
     timeout-minutes: 120
 
@@ -26,16 +27,38 @@ jobs:
         with:
           flutter-version: '3.47.3'
           channel: stable
+          cache: true
 
-      - name: Prepare project
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK components
+        run: |
+          sdkmanager --install \
+            "platforms;android-36" \
+            "build-tools;36.1.0" \
+            "ndk;28.2.13676358"
+
+      - name: Prepare Flutter project
         working-directory: samples/litert/flutter
         run: |
+          chmod +x tool/flutter_litert/vendor.sh
+          chmod +x tool/fetch_models.sh
+          bash tool/flutter_litert/vendor.sh
+          bash tool/fetch_models.sh
           flutter pub get
 
-      - name: Build APK
+      - name: Build release APK
         working-directory: samples/litert/flutter
         run: |
-          flutter build apk --release --target-platform android-arm64
+          flutter build apk \
+            --release \
+            --target-platform android-arm64
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
